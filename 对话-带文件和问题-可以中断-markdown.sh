@@ -2,18 +2,19 @@
 
 # 定义要处理的目录和文件路径
 DIRS_AND_FILES=(
-src/components/chat/ChartRenderer.vue
+src/components/queryvector/QueryVectorForm.vue
+src/components/queryvector/QueryVectorTable.vue
 )
 # 任务
-ask='整理上面代码中的业务逻辑,转成mermaid'
+ask="要求QueryVectorTable选择数据库使用一个databaseinfo, 并将其传递进入QueryVectorForm"
 # 角色
 System='程序员'
 
 
 
 # AI配置
-API_URL="http://localhost:3000/v1/chat/completions"
-OPENAI_API_KEY="sk-JavcHYE2CFFv88KWFdB13e9b85B544C7BdE0487c466cC63b"
+API_URL="http://192.168.3.14:3000/v1/chat/completions"
+OPENAI_API_KEY="sk-SyzHBKZrGzNbFZ8a7eF7Bc6846A94189B34fEdC0F6F902A5"
 MODEL="deepseek-coder"
 
 # 捕捉 SIGINT (Ctrl+C) 信号
@@ -76,7 +77,7 @@ send_request() {
     while IFS= read -r line; do
         clean_line=$(echo "$line" | sed 's/^data: //')
         [[ "$clean_line" == "[DONE]" ]] && add_to_history "assistant" "$ai_response" && break
-        content=$(echo "$clean_line" | jq '.choices[0].delta.content // empty' | sed 's/^"//; s/"$//')
+        content=$(echo "$clean_line" | jq '.choices[0].delta.content // empty'| sed 's/^"//; s/"$//' | sed 's/\\"/"/g')
         [[ -n "$content" ]] && ai_response+="$content" && printf "%b" "$content"
     done < $PIPE_FILE | bat --paging=never -l md --style=plain
     echo
